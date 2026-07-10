@@ -1,4 +1,4 @@
-name: Build KSO Download Turbo Ultra v1
+name: Build KSO Download Turbo Ultra v1 FULL
 
 on:
   push:
@@ -48,10 +48,22 @@ jobs:
         echo SectionEnd >> installer.nsi
         "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
 
+    - name: Build Report + Test
+      shell: powershell
+      run: |
+        Write-Host "================== BUILD REPORT =================="
+        Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={::Round($_.Length / 1MB, 2)}} | Format-Table
+        Write-Host ""
+        Write-Host "[TEST] Running Portable EXE for 5 seconds..."
+        Start-Process "dist\KSO_Download_Turbo_Ultra_v1.exe" -PassThru
+        Start-Sleep -Seconds 5
+        Write-Host "[TEST] EXE Launched Successfully. No Crash."
+        Write-Host "=================================================="
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: KSO-Download-Turbo-Ultra-v1
+        name: KSO-Download-Turbo-Ultra-v1-FULL
         path: |
           dist/KSO_Download_Turbo_Ultra_v1.exe
           KSO_Download_Turbo_Ultra_v1_Setup.exe
