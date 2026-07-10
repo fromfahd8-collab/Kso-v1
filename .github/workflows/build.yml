@@ -29,7 +29,7 @@ jobs:
         python -c "from PIL import Image; img = Image.open('icon.png'); img.save('icon.ico', format='ICO', sizes=[(256,256),(128,128),(64,64),(32,32),(16,16)])"
 
     - name: Install NSIS
-      run: choco install nsis -y
+      run: choco install nsis -y --no-progress
 
     - name: Build Portable EXE
       run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=icon.ico --add-data "lang.json;." --add-data "config.json;." --collect-all yt_dlp --collect-all customtkinter main.py
@@ -50,20 +50,16 @@ jobs:
         echo "File icon.ico" >> installer.nsi
         echo "CreateShortcut '\$DESKTOP\\\${APPNAME}.lnk' '\$INSTDIR\\KSO_Download_Turbo_Ultra_v1.exe'" >> installer.nsi
         echo "SectionEnd" >> installer.nsi
-        makensis installer.nsi
+        & 'C:\Program Files (x86)\NSIS\makensis.exe' installer.nsi
 
     - name: Build Report
       run: |
         echo ================== BUILD REPORT ==================
         echo.
-        echo [1] Files in dist folder:
-        dir dist
+        echo [1] File Sizes:
+        powershell -command "Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={::Round($_.Length / 1MB, 2)}}"
         echo.
-        echo [2] File Sizes:
-        powershell -command "Get-ChildItem dist | Select-Object Name, @{Name='Size_MB';Expression={[math]::Round($_.Length / 1MB, 2)}}"
-        powershell -command "Get-ChildItem *.exe | Select-Object Name, @{Name='Size_MB';Expression={[math]::Round($_.Length / 1MB, 2)}}"
-        echo.
-        echo [3] Python Packages Used:
+        echo [2] Python Packages Used:
         pip freeze
         echo ==================================================
 
