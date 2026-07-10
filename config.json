@@ -1,0 +1,14 @@
+{
+  "path": "",
+  "quality": "1080p",
+  "parallel": 4,
+  "shutdown": false,
+  "language": "ar",
+  "smart_mode": true,
+  "manual_threads": 32,
+  "speed_limit_kbps": 0,
+  "schedule_enabled": false,
+  "schedule_time": "00:00",
+  "password": "",
+  "hidden": false
+}
