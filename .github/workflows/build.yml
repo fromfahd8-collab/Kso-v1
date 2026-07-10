@@ -18,7 +18,6 @@ jobs:
       run: |
         echo {} > config.json
         echo {\"ar\":{},\"en\":{}} > lang.json
-        echo "Icon" > app_icon.ico
 
     - name: Install dependencies
       run: |
@@ -29,14 +28,14 @@ jobs:
       run: choco install nsis -y
 
     - name: Build Portable EXE
-      run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=app_icon.ico --add-data "lang.json;." --add-data "config.json;." main.py
+      run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=icon.ico --add-data "lang.json;." --add-data "config.json;." main.py
 
     - name: Build Installer EXE
       run: |
         echo "!define APPNAME 'KSO Download Turbo Ultra v1'" > installer.nsi
-        echo "!define COMPANYNAME 'KSO'" >> installer.nsi
         echo "OutFile KSO_Download_Turbo_Ultra_v1_Setup.exe" >> installer.nsi
         echo "InstallDir \$PROGRAMFILES\\\${APPNAME}" >> installer.nsi
+        echo "Icon icon.ico" >> installer.nsi
         echo "Page directory" >> installer.nsi
         echo "Page instfiles" >> installer.nsi
         echo "Section" >> installer.nsi
@@ -44,6 +43,7 @@ jobs:
         echo "File /r dist\\*" >> installer.nsi
         echo "File lang.json" >> installer.nsi
         echo "File config.json" >> installer.nsi
+        echo "File icon.ico" >> installer.nsi
         echo "CreateShortcut '\$DESKTOP\\\${APPNAME}.lnk' '\$INSTDIR\\KSO_Download_Turbo_Ultra_v1.exe'" >> installer.nsi
         echo "SectionEnd" >> installer.nsi
         makensis installer.nsi
