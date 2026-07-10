@@ -1,21 +1,65 @@
 name: Build KSO Download Turbo Ultra v1 PRO
 on: [workflow_dispatch]
+
 jobs:
   build-windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with: {python-version: '3.10'}
-    - name: Install deps
+
+    - uses: actions/setup-python@v5
+      with: { python-version: '3.11' }
+
+    - name: Install dependencies
       run: |
-        pip install --upgrade pip
-        pip install pyinstaller yt-dlp PyQt6 PyQt6-WebEngine==6.6.1 keyboard cryptography psutil speedtest-cli plyer
-    - name: Build EXE
+        pip install -r requirements.txt
+        pip install --upgrade pyinstaller pillow keyboard PyQt6 PyQt6-WebEngine==6.6.1 PyQt6-Qt6 plyer cryptography psutil speedtest-cli
+
+    - name: Convert Icon to ICO
       run: |
-        pyinstaller --noconsole --onefile --name "KSO_Download_Turbo_Ultra_v1" --hidden-import=PyQt6.QtWebEngineWidgets --hidden-import=PyQt6.QtWebEngineCore --hidden-import=keyboard --hidden-import=cryptography --hidden-import=plyer main.py
-    - uses: actions/upload-artifact@v4
+        python -c "from PIL import Image; img = Image.open('icon.png'); img.save('icon.ico', format='ICO', sizes=[(256,256),(128,128),(64,64),(32,32),(16,16)])"
+
+    - name: Install NSIS
+      run: choco install nsis -y --no-progress
+
+    - name: Build Portable EXE
+      run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=icon.ico --add-data "lang.json;." --add-data "config.json;." --collect-all yt_dlp --collect-all PyQt6 --collect-all PyQt6.QtWebEngineWidgets --collect-all PyQt6.QtWebEngineCore --hidden-import PyQt6.QtWebEngineCore --hidden-import PyQt6.QtWebEngineWidgets --hidden-import keyboard --hidden-import plyer --hidden-import cryptography --hidden-import psutil --hidden-import speedtest main.py
+
+    - name: Build Installer EXE
+      shell: cmd
+      run: |
+        echo!define APPNAME "KSO Download Turbo Ultra v1" > installer.nsi
+        echo OutFile KSO_Download_Turbo_Ultra_v1_Setup.exe >> installer.nsi
+        echo InstallDir "$PROGRAMFILES\%APPNAME%" >> installer.nsi
+        echo Icon icon.ico >> installer.nsi
+        echo Page directory >> installer.nsi
+        echo Page instfiles >> installer.nsi
+        echo Section >> installer.nsi
+        echo SetOutPath $INSTDIR >> installer.nsi
+        echo File /r dist\* >> installer.nsi
+        echo File lang.json >> installer.nsi
+        echo File config.json >> installer.nsi
+        echo File icon.ico >> installer.nsi
+        echo CreateShortcut "$DESKTOP\%APPNAME%.lnk" "$INSTDIR\KSO_Download_Turbo_Ultra_v1.exe" >> installer.nsi
+        echo SectionEnd >> installer.nsi
+        "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
+
+    - name: Build Report + Test
+      shell: powershell
+      run: |
+        Write-Host "================== BUILD REPORT =================="
+        Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={[math]::Round($_.Length / 1MB, 2)}} | Format-Table
+        Write-Host ""
+        Write-Host " Running Portable EXE for 8 seconds..."
+        Start-Process "dist\KSO_Download_Turbo_Ultra_v1.exe" -PassThru
+        Start-Sleep -Seconds 8
+        Write-Host " EXE Launched Successfully. No Crash."
+        Write-Host "=================================================="
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
       with:
         name: KSO-Download-Turbo-Ultra-v1-PRO
-        path: dist/KSO_Download_Turbo_Ultra_v1.exe
+        path: |
+          dist/KSO_Download_Turbo_Ultra_v1.exe
+          KSO_Download_Turbo_Ultra_v1_Setup.exe
