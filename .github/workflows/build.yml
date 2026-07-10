@@ -22,13 +22,22 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-        pip install pyinstaller
+        pip install pyinstaller pillow
+
+    - name: Convert Icon to ICO
+      run: |
+        python -c "from PIL import Image; img = Image.open('icon.png'); img.save('icon.ico', format='ICO', sizes=[(256,256),(128,128),(64,64),(32,32),(16,16)])"
 
     - name: Install NSIS
       run: choco install nsis -y
 
     - name: Build Portable EXE
-      run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=icon.ico --add-data "lang.json;." --add-data "config.json;." main.py
+      run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=icon.ico --add-data "lang.json;." --add-data "config.json;." --collect-all yt_dlp --collect-all customtkinter main.py
+
+    - name: Test EXE Runs
+      run: |
+        Start-Process -FilePath "dist\KSO_Download_Turbo_Ultra_v1.exe" -PassThru
+        timeout /t 5
 
     - name: Build Installer EXE
       run: |
