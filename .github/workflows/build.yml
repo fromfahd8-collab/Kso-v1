@@ -14,11 +14,6 @@ jobs:
     - uses: actions/setup-python@v5
       with: { python-version: '3.11' }
 
-    - name: Create Required Files
-      run: |
-        echo {} > config.json
-        echo {\"ar\":{},\"en\":{}} > lang.json
-
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
@@ -52,18 +47,6 @@ jobs:
         echo CreateShortcut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\KSO_Download_Turbo_Ultra_v1.exe" >> installer.nsi
         echo SectionEnd >> installer.nsi
         "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
-
-    - name: Build Report
-      shell: powershell
-      run: |
-        Write-Host "================== BUILD REPORT =================="
-        Write-Host ""
-        Write-Host "[1] File Sizes:"
-        Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={[math]::Round($_.Length / 1MB, 2)}} | Format-Table
-        Write-Host ""
-        Write-Host "[2] Python Packages Used:"
-        pip freeze
-        Write-Host "=================================================="
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
