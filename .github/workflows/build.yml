@@ -1,4 +1,4 @@
-name: Build KSO Download Turbo Ultra v1 FULL
+name: Build KSO Download Turbo Ultra v1 FINAL
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
       run: |
         echo!define APPNAME "KSO Download Turbo Ultra v1" > installer.nsi
         echo OutFile KSO_Download_Turbo_Ultra_v1_Setup.exe >> installer.nsi
-        echo InstallDir "$PROGRAMFILES\${APPNAME}" >> installer.nsi
+        echo InstallDir "$PROGRAMFILES\%APPNAME%" >> installer.nsi
         echo Icon icon.ico >> installer.nsi
         echo Page directory >> installer.nsi
         echo Page instfiles >> installer.nsi
@@ -44,7 +44,7 @@ jobs:
         echo File lang.json >> installer.nsi
         echo File config.json >> installer.nsi
         echo File icon.ico >> installer.nsi
-        echo CreateShortcut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\KSO_Download_Turbo_Ultra_v1.exe" >> installer.nsi
+        echo CreateShortcut "$DESKTOP\%APPNAME%.lnk" "$INSTDIR\KSO_Download_Turbo_Ultra_v1.exe" >> installer.nsi
         echo SectionEnd >> installer.nsi
         "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
 
@@ -52,7 +52,7 @@ jobs:
       shell: powershell
       run: |
         Write-Host "================== BUILD REPORT =================="
-        Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={::Round($_.Length / 1MB, 2)}} | Format-Table
+        Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={[math]::Round($_.Length / 1MB, 2)}} | Format-Table
         Write-Host ""
         Write-Host "[TEST] Running Portable EXE for 5 seconds..."
         Start-Process "dist\KSO_Download_Turbo_Ultra_v1.exe" -PassThru
@@ -63,7 +63,7 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: KSO-Download-Turbo-Ultra-v1-FULL
+        name: KSO-Download-Turbo-Ultra-v1-FINAL
         path: |
           dist/KSO_Download_Turbo_Ultra_v1.exe
           KSO_Download_Turbo_Ultra_v1_Setup.exe
