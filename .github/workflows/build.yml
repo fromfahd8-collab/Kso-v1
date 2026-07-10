@@ -35,22 +35,23 @@ jobs:
       run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=icon.ico --add-data "lang.json;." --add-data "config.json;." --collect-all yt_dlp --collect-all customtkinter main.py
 
     - name: Build Installer EXE
+      shell: cmd
       run: |
-        echo "!define APPNAME 'KSO Download Turbo Ultra v1'" > installer.nsi
-        echo "OutFile KSO_Download_Turbo_Ultra_v1_Setup.exe" >> installer.nsi
-        echo "InstallDir \$PROGRAMFILES\\\${APPNAME}" >> installer.nsi
-        echo "Icon icon.ico" >> installer.nsi
-        echo "Page directory" >> installer.nsi
-        echo "Page instfiles" >> installer.nsi
-        echo "Section" >> installer.nsi
-        echo "SetOutPath \$INSTDIR" >> installer.nsi
-        echo "File /r dist\\*" >> installer.nsi
-        echo "File lang.json" >> installer.nsi
-        echo "File config.json" >> installer.nsi
-        echo "File icon.ico" >> installer.nsi
-        echo "CreateShortcut '\$DESKTOP\\\${APPNAME}.lnk' '\$INSTDIR\\KSO_Download_Turbo_Ultra_v1.exe'" >> installer.nsi
-        echo "SectionEnd" >> installer.nsi
-        & 'C:\Program Files (x86)\NSIS\makensis.exe' installer.nsi
+        echo!define APPNAME "KSO Download Turbo Ultra v1" > installer.nsi
+        echo OutFile KSO_Download_Turbo_Ultra_v1_Setup.exe >> installer.nsi
+        echo InstallDir "$PROGRAMFILES\${APPNAME}" >> installer.nsi
+        echo Icon icon.ico >> installer.nsi
+        echo Page directory >> installer.nsi
+        echo Page instfiles >> installer.nsi
+        echo Section >> installer.nsi
+        echo SetOutPath $INSTDIR >> installer.nsi
+        echo File /r dist\* >> installer.nsi
+        echo File lang.json >> installer.nsi
+        echo File config.json >> installer.nsi
+        echo File icon.ico >> installer.nsi
+        echo CreateShortcut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\KSO_Download_Turbo_Ultra_v1.exe" >> installer.nsi
+        echo SectionEnd >> installer.nsi
+        "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
 
     - name: Build Report
       run: |
@@ -58,9 +59,6 @@ jobs:
         echo.
         echo [1] File Sizes:
         powershell -command "Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={::Round($_.Length / 1MB, 2)}}"
-        echo.
-        echo [2] Python Packages Used:
-        pip freeze
         echo ==================================================
 
     - name: Upload Artifacts
