@@ -1,8 +1,6 @@
 name: Build KSO Download Turbo Ultra v1 FINAL
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -17,7 +15,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-        pip install pyinstaller pillow
+        pip install pyinstaller pillow keyboard
 
     - name: Convert Icon to ICO
       run: |
@@ -27,7 +25,7 @@ jobs:
       run: choco install nsis -y --no-progress
 
     - name: Build Portable EXE
-      run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=icon.ico --add-data "lang.json;." --add-data "config.json;." --collect-all yt_dlp --collect-all customtkinter main.py
+      run: pyinstaller --onefile --windowed --name "KSO_Download_Turbo_Ultra_v1" --icon=icon.ico --add-data "lang.json;." --add-data "config.json;." --collect-all yt_dlp --collect-all customtkinter --hidden-import keyboard main.py
 
     - name: Build Installer EXE
       shell: cmd
@@ -52,12 +50,12 @@ jobs:
       shell: powershell
       run: |
         Write-Host "================== BUILD REPORT =================="
-        Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={[math]::Round($_.Length / 1MB, 2)}} | Format-Table
+        Get-ChildItem dist, *.exe | Select-Object Name, @{Name='Size_MB';Expression={[Math]::Round($_.Length / 1MB, 2)}} | Format-Table
         Write-Host ""
-        Write-Host "[TEST] Running Portable EXE for 5 seconds..."
+        Write-Host " Running Portable EXE for 5 seconds..."
         Start-Process "dist\KSO_Download_Turbo_Ultra_v1.exe" -PassThru
         Start-Sleep -Seconds 5
-        Write-Host "[TEST] EXE Launched Successfully. No Crash."
+        Write-Host " EXE Launched Successfully. No Crash."
         Write-Host "=================================================="
 
     - name: Upload Artifacts
